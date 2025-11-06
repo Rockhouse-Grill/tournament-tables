@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="10">
+    <title>Rockhouse 8-Ball - Current Table Assignments</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); 
+  min-height: 100vh; padding: 20px; }
+.container { max-width: 1400px; margin: 0 auto; }
+.header { text-align: center; color: white; margin-bottom: 30px; padding: 20px; 
+  background: rgba(255, 255, 255, 0.1); border-radius: 20px; backdrop-filter: blur(10px); 
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
+.header h1 { font-size: 3em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+.header h2 { font-size: 1.8em; margin-bottom: 15px; opacity: 0.9; }
+.update-time { font-size: 1.1em; opacity: 0.8; }
+.refresh-section { text-align: center; margin-bottom: 20px; display: none; }
+.refresh-instructions { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+  color: white; padding: 20px; border-radius: 15px; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+.refresh-icon { font-size: 2.5em; margin: 0; line-height: 1; 
+  animation: bounce 2s infinite; }
+.refresh-title { font-size: 1.2em; font-weight: bold; margin: 10px 0 5px 0; }
+.refresh-subtitle { font-size: 0.9em; opacity: 0.9; margin: 0; }
+@keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 
+  40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
+.tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+  gap: 25px; margin-bottom: 30px; }
+.table-card { background: white; border-radius: 1px; overflow: hidden; 
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15); transition: all 0.3s ease; }
+.table-card:hover { transform: translateY(-8px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25); }
+.table-header { padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+.occupied-header { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.available-header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.table-number { font-size: 1.8em; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+.status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75em; 
+  font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+.in-use { background: rgba(255, 255, 255, 0.3); color: white; }
+.available-badge { background: rgba(255, 255, 255, 0.3); color: white; }
+.table-body { padding: 1px; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+.matchup { width: 100%; }
+.player-line { display: flex; align-items: center; gap: 12px; padding: 2px; 
+  background: #ffffff; border-radius: 10px; margin-bottom: 3px; }
+.losses { font-size: 1.8em; font-weight: bold; color: #0a0a0a; 
+  min-width: 35px; text-align: center; }
+.player-name { font-size: 1.8em; font-weight: bold; color: #000000; flex: 1; }
+.vs-divider { text-align: center; font-weight: bold; color: #7f8c8d; 
+  font-size: 1em; padding: 1px 2px; letter-spacing: 2px; }
+.empty-message { text-align: center; color: #95a5a6; font-style: italic; 
+  padding: 30px; font-size: 1.1em; }
+.footer { text-align: center; color: white; padding: 30px; opacity: 0.9; 
+  background: rgba(255, 255, 255, 0.05); border-radius: 15px; backdrop-filter: blur(5px); }
+.footer p { margin: 5px 0; font-size: 1.1em; }
+@media (max-width: 768px) { 
+  body { padding: 10px; } 
+  .header { padding: 20px 15px; margin-bottom: 20px; } 
+  .header h1 { font-size: 1.8em; margin-bottom: 5px; } 
+  .header h2 { font-size: 1.1em; margin-bottom: 8px; } 
+  .update-time { font-size: 0.85em; } 
+  .refresh-section { display: block; } 
+  .tables-grid { grid-template-columns: 1fr; gap: 8px; } 
+  .table-card { border-radius: 8px; } 
+  .table-header { padding: 8px 12px; } 
+  .table-number { font-size: 1.3em; } 
+  .status-badge { padding: 3px 8px; font-size: 0.6em; } 
+  .table-body { padding: 8px; min-height: 80px; } 
+  .player-line { padding: 4px 8px; gap: 6px; margin-bottom: 4px; border-radius: 4px; } 
+  .losses { font-size: 1.1em; min-width: 28px; } 
+  .player-name { font-size: 1.1em; } 
+  .vs-divider { font-size: 0.75em; padding: 1px; } 
+  .footer { display: none; } 
+  .footer { padding: 15px; } 
+  .footer p { font-size: 0.9em; } 
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rockhouse 8-Ball</h1>
+            <h2>Current Table Assignments</h2>
+            <p class="update-time">Last Updated: 1:19 PM</p>
+        </div>
+
+        <div class="refresh-section">
+            <div class="refresh-instructions">
+                <div class="refresh-icon">&#128260;</div>
+                <p class="refresh-title">Pull down to refresh</p>
+                <p class="refresh-subtitle">Get latest table assignments</p>
+            </div>
+        </div>
+
+        <div class="tables-grid">
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 1</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(5)</span>
+                            <span class="player-name">Josh Linder</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(8)</span>
+                            <span class="player-name">Stephan</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 2</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(10)</span>
+                            <span class="player-name">Liz</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(9)</span>
+                            <span class="player-name">Kenzie</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 3</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(8)</span>
+                            <span class="player-name">Michell T</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(7)</span>
+                            <span class="player-name">Mike Heath</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 4</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(4)</span>
+                            <span class="player-name">Brian Goodson</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(6)</span>
+                            <span class="player-name">Christi Steele</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 5</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(4)</span>
+                            <span class="player-name">Billy Murdock</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(6)</span>
+                            <span class="player-name">Mark Taylor</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 6</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(4)</span>
+                            <span class="player-name">Buffy Jolie</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(8)</span>
+                            <span class="player-name">Cameron Williams</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 7</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(7)</span>
+                            <span class="player-name">Sean Queen "Drag"</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(4)</span>
+                            <span class="player-name">Jimmy Tanner</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 8</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(9)</span>
+                            <span class="player-name">Michelle Anderson</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(5)</span>
+                            <span class="player-name">Ricardo Garcia</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
+                    <div class="table-number">Table 9</div>
+                    <div class="status-badge in-use">IN USE</div>
+                </div>
+                <div class="table-body">
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(7)</span>
+                            <span class="player-name">Matt Dover</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(4)</span>
+                            <span class="player-name">Brian Turner "Slim"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-card available">
+                <div class="table-header available-header">
+                    <div class="table-number">Table 10</div>
+                    <div class="status-badge available-badge">AVAILABLE</div>
+                </div>
+                <div class="table-body">
+                    <div class="empty-message">Waiting for assignment...</div>
+                </div>
+            </div>
+            <div class="table-card available">
+                <div class="table-header available-header">
+                    <div class="table-number">Table 11</div>
+                    <div class="status-badge available-badge">AVAILABLE</div>
+                </div>
+                <div class="table-body">
+                    <div class="empty-message">Waiting for assignment...</div>
+                </div>
+            </div>
+            <div class="table-card available">
+                <div class="table-header available-header">
+                    <div class="table-number">Table 12</div>
+                    <div class="status-badge available-badge">AVAILABLE</div>
+                </div>
+                <div class="table-body">
+                    <div class="empty-message">Waiting for assignment...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>9 of 12 tables currently in use</p>
+            <p>This page automatically refreshes every 10 seconds</p>
+        </div>
+    </div>
+    <script>
+        // Force refresh every 10 seconds
+        setTimeout(function() {
+            location.reload(true);
+        }, 10000);
+    </script>
+</body>
+</html>
