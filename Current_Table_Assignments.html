@@ -82,7 +82,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         <div class="header">
             <h1>Rockhouse 8-Ball</h1>
             <h2>Current Table Assignments</h2>
-            <p class="update-time">Last Updated: 11:58 AM</p>
+            <p class="update-time">Last Updated: 11:59 AM</p>
         </div>
 
         <div class="refresh-section">
@@ -94,13 +94,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         </div>
 
         <div class="tables-grid">
-            <div class="table-card available">
-                <div class="table-header available-header">
+            <div class="table-card occupied">
+                <div class="table-header occupied-header">
                     <div class="table-number">Table 1</div>
-                    <div class="status-badge available-badge">AVAILABLE</div>
+                    <div class="status-badge in-use">IN USE</div>
                 </div>
                 <div class="table-body">
-                    <div class="empty-message">Waiting for assignment...</div>
+                    <div class="matchup">
+                        <div class="player-line">
+                            <span class="losses">(6)</span>
+                            <span class="player-name">Josh Hullett</span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="player-line">
+                            <span class="losses">(8)</span>
+                            <span class="player-name">Zack Withers</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="table-card occupied">
@@ -315,7 +325,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         </div>
 
         <div class="footer">
-            <p>11 of 12 tables currently in use</p>
+            <p>12 of 12 tables currently in use</p>
             <p>This page automatically refreshes every 10 seconds</p>
         </div>
     </div>
